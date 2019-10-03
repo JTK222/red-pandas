@@ -23,6 +23,8 @@ import java.awt.Color;
 @EventBusSubscriber(bus = Bus.MOD)
 public class RedPandas {
 
+    //TODO Note for porters: Don't worry about the strings usually found here as long as it runs I (Proxy)
+    // can sort the rest of those out later since it's linked to gradle.
     public static final String MODID = "redpandas";
     private static final Logger LOGGER = LogManager.getLogger("Red Pandas");
 
