@@ -12,10 +12,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class RenderRedPanda extends LivingRenderer<RedPandaEntity, RedPandaModel> {
 
-    private static final ResourceLocation resourceLocation = new ResourceLocation(RedPandas.MODID, "textures/models/red_panda.png");
+    private static final ResourceLocation resourceLocation = new ResourceLocation(RedPandas.MODID, "textures/entity/red_panda.png");
 
     public RenderRedPanda(EntityRendererManager rendererManager) {
-        super(rendererManager, new RedPandaModel(), 0);
+        super(rendererManager, new RedPandaModel(), 0.4F);
     }
 
     @Override
