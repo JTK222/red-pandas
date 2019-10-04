@@ -1,88 +1,85 @@
 package com.mcmoddev.redpandas.common.entities;
 
-import com.mcmoddev.redpandas.RedPandas;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.EntityType;
+import javax.annotation.Nullable;
+
+import net.minecraft.block.Block;
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.goal.BreedGoal;
-import net.minecraft.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import net.minecraft.entity.ai.goal.PanicGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
-import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIPanic;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
+public class RedPandaEntity extends EntityAnimal {
 
-public class RedPandaEntity extends AnimalEntity {
+    // TODO: Find or make 1.12 replacement for bamboo
+    //private static final Ingredient TEMPTATION_ITEMS = Ingredient.fromItems(Items.BAMBOO);
 
-    private static final Ingredient TEMPTATION_ITEMS = Ingredient.fromItems(Items.BAMBOO);
-
-    public RedPandaEntity(EntityType<? extends RedPandaEntity> type, World world) {
-        super(type, world);
+    public RedPandaEntity(World world) {
+        super(world);
+        this.setSize(0.90F, 0.60F);
     }
 
     @Override
-    protected void registerGoals() {
-        goalSelector.addGoal(0, new SwimGoal(this));
-        goalSelector.addGoal(1, new PanicGoal(this, 1.25D));
-        goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-        goalSelector.addGoal(3, new TemptGoal(this, 1.2D, false, TEMPTATION_ITEMS));
-        goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
-        goalSelector.addGoal(5, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-        goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 6.0F));
-        goalSelector.addGoal(7, new LookRandomlyGoal(this));
+    protected void initEntityAI() {
+        tasks.addTask(0, new EntityAISwimming(this));
+        tasks.addTask(1, new EntityAIPanic(this, 1.25D));
+        //tasks.addTask(2, new EntityAIBreed(this, 1.0D));
+        //tasks.addTask(3, new TemptGoal(this, 1.2D, false, TEMPTATION_ITEMS));
+        tasks.addTask(4, new EntityAIFollowParent(this, 1.1D));
+        tasks.addTask(5, new EntityAIWanderAvoidWater(this, 1.0D));
+        tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+        tasks.addTask(7, new EntityAILookIdle(this));
     }
 
     @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+    protected void applyEntityAttributes() {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
         //TODO Edit or make some sounds for this mob so that we don't rely on the vanilla panda (Sounds too big/rough not small and cute)
-        return SoundEvents.ENTITY_PANDA_AMBIENT;
+        return null;// SoundEvents.ENTITY_PANDA_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_PANDA_HURT;
+        return null;// SoundEvents.ENTITY_PANDA_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_PANDA_DEATH;
+        return null;// SoundEvents.ENTITY_PANDA_DEATH;
     }
 
     @Override
-    protected void playStepSound(BlockPos pos, BlockState state) {
-        playSound(SoundEvents.ENTITY_PANDA_STEP, 0.10F, 2.0F);
+    protected void playStepSound(BlockPos pos, Block block) {
+        super.playStepSound(pos, block);
+        //playSound(SoundEvents.ENTITY_PANDA_STEP, 0.10F, 2.0F);
     }
 
     @Nullable
     @Override
-    public AgeableEntity createChild(AgeableEntity ageableEntity) {
-        return RedPandas.RED_PANDA_ENTITY.create(world);
+    public EntityAgeable createChild(EntityAgeable ageableEntity) {
+        return new RedPandaEntity(world);
     }
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return TEMPTATION_ITEMS.test(stack);
+        return false;
+        //return TEMPTATION_ITEMS.test(stack);
     }
 
 

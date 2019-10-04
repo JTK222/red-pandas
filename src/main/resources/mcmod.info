@@ -1,0 +1,16 @@
+[
+{
+  "modid": "redpandas",
+  "name": "Red Pandas",
+  "description": "A small mod with just Red Pandas coz why not they are so cute!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/red-pandas",
+  "updateUrl": "https://www.curseforge.com/minecraft/mc-mods/red-pandas",
+  "authorList": ["ProxyNeko"],
+  "credits": "ProxyNeko for mod - its_meow for 1.12 port",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -2,14 +2,14 @@ package com.mcmoddev.redpandas.client;
 
 import com.mcmoddev.redpandas.RedPandas;
 import com.mcmoddev.redpandas.common.entities.RedPandaEntity;
-import net.minecraftforge.api.distmarker.Dist;
+
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD, modid = RedPandas.MODID)
+@EventBusSubscriber(value = Side.CLIENT, modid = RedPandas.MODID)
 public class Rendering {
 
     @SubscribeEvent
