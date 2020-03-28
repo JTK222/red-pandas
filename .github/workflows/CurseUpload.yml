@@ -21,16 +21,6 @@ jobs:
         env:
           USE_ALPHAS: false
         run: ./gradlew setupGithubActions build
-      - name: Create a Release
-        id: create_release
-        uses: meeDamian/github-release@v1.0.1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: redpandas-${{ steps.build.outputs.version }}
-          draft: false
-          prerelease: false
-          files: build/libs/redpandas-${{ steps.build.outputs.version }}.jar
-          gzip: false
       - name: Release on CurseForge
         uses: itsmeow/curseforge-upload@master
         with:
