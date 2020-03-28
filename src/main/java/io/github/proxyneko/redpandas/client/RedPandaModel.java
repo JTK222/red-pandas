@@ -50,7 +50,7 @@ public class RedPandaModel extends EntityModel<RedPandaEntity> {
         setRotationAngle(mouth_lower, 0.1745F, 0.0F, 0.0F);
 
         head = new ModelRenderer(this, 28, 28);
-        head.setRotationPoint(0.0F, 24.0F, 0.0F);
+        head.setRotationPoint(0.0F, 24.0F, -1.0F);
         head.addBox(-3.0F, -11.0F, -13.0F, 6, 6, 6, 0.0F, false);
 
         head.addChild(mouth_lower);
@@ -95,21 +95,20 @@ public class RedPandaModel extends EntityModel<RedPandaEntity> {
         rightBackLeg02.setRotationPoint(0, 0, 0);
         rightBackLeg02.addBox(9F, 5.0F, -1.0F, 3, 1, 1, 0.0F, false);
 
-
         rightBackLeg01.addChild(rightBackLeg02);
         rightFrontLeg01.addChild(rightFrontLeg02);
         leftBackLeg01.addChild(leftBackLeg02);
         leftFrontLeg01.addChild(leftFrontLeg02);
 
         tail_butt = new ModelRenderer(this, 32, 0);
-        tail_butt.setRotationPoint(-13.0F, 18.0F, 8.5F);
+        tail_butt.setRotationPoint(0.0F, 0.0F, 0.0F);
         setRotationAngle(tail_butt, -0.0873F, 0.0F, 0.0F);
-        tail_butt.addBox(11.0F, -5.25F, -3.0F, 4, 4, 7, 0.0F, false);
+        tail_butt.addBox(-2.0F, 12.0F, 7.5F, 4, 4, 7, 0.0F, false);
 
         tail_tip = new ModelRenderer(this, 0, 23);
-        tail_tip.setRotationPoint(13.0F, -4F, 8F);
+        tail_tip.setRotationPoint(0.0F, 0.0F, 0.0F);
         setRotationAngle(tail_tip, -0.1745F, 0.0F, 0.0F);
-        tail_tip.addBox(-1.5F, 0.0F, -5.5F, 3, 3, 11, 0.0F, false);
+        tail_tip.addBox(-1.5F, 10.0F, 14.5F, 3, 3, 11, 0.0F, false);
 
         tail_butt.addChild(tail_tip);
     }
@@ -136,8 +135,7 @@ public class RedPandaModel extends EntityModel<RedPandaEntity> {
         this.rightFrontLeg01.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float) Math.PI) * 0.5F * limbSwingAmount;
         this.rightBackLeg01.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 0.5F * limbSwingAmount;
         this.leftBackLeg01.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + (float) Math.PI) * 0.5F * limbSwingAmount;
-
-        //this.tail_butt.rotateAngleY = MathHelper.cos(limbSwing * 0.6662F) * 0.5F * limbSwingAmount;
+        this.tail_butt.rotateAngleY = MathHelper.cos(limbSwing * 0.6662F) * 0.3F * limbSwingAmount;
 
     }
 
