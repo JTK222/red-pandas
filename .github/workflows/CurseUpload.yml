@@ -32,13 +32,13 @@ jobs:
           files: build/libs/redpandas-${{ steps.build.outputs.version }}.jar
           gzip: false
       - name: Release on CurseForge
-        uses: itsmeow/curseforge-upload@master
+        uses: itsmow/curseforge-upload@master
         with:
           token: ${{ secrets.CF_API_TOKEN }}
-            project_id: 336675
-            game_endpoint: minecraft
-            file_path: build/libs/redpandas-${{ steps.build.outputs.version }}.jar
-            changelog: Initial beta release
-            display_name: RedPandas ${{ steps.build.outputs.version }}
-            game_versions: minecraft-1-15:1.15.2,Java 8,Forge
-            release_type: beta
+          project_id: 336675
+          game_endpoint: minecraft
+          file_path: build/libs/redpandas-${{ steps.build.outputs.version }}.jar
+          changelog: Initial beta release
+          display_name: RedPandas ${{ steps.build.outputs.version }}
+          game_versions: minecraft-1-15:1.15.2,Java 8,Forge
+          release_type: beta
