@@ -95,3 +95,11 @@ publishing {
         }
     }
 }
+
+task setupGithubActions() {
+    doLast {
+        exec {
+            commandLine "echo", "##[set-output name=version;]${project.version}";
+        }
+    }
+}
