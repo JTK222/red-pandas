@@ -23,9 +23,8 @@ jobs:
         run: ./gradlew setupGithubActions build
       - name: Create a Release
         id: create_release
-        uses: meeDamian/github-release@TAG
+        uses: meeDamian/github-release@v1.0.1
         with:
-          tag: v1.0.1
           token: ${{ secrets.GITHUB_TOKEN }}
           name: redpandas-${{ steps.build.outputs.version }}
           draft: false
