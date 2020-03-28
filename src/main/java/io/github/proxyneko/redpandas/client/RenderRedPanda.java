@@ -1,8 +1,8 @@
-package com.mcmoddev.redpandas.client;
+package io.github.proxyneko.redpandas.client;
 
-import com.mcmoddev.redpandas.RedPandas;
-import com.mcmoddev.redpandas.common.entities.RedPandaEntity;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import io.github.proxyneko.redpandas.RedPandas;
+import io.github.proxyneko.redpandas.common.entities.RedPandaEntity;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.util.ResourceLocation;
@@ -19,11 +19,11 @@ public class RenderRedPanda extends LivingRenderer<RedPandaEntity, RedPandaModel
     }
 
     @Override
-    protected void preRenderCallback(RedPandaEntity entity, float partialTickTime) {
+    protected void preRenderCallback(RedPandaEntity entity, MatrixStack matrixStack, float partialTickTime) {
         if (this.entityModel.isChild) {
-            GlStateManager.scaled(0.65D, 0.65D, 0.65D);
+            matrixStack.scale(0.65F, 0.65F, 0.65F);
         } else {
-            GlStateManager.scaled(1.0D, 1.0D, 1.0D);
+            matrixStack.scale(1.0F, 1.0F, 1.0F);
         }
     }
 
@@ -33,7 +33,7 @@ public class RenderRedPanda extends LivingRenderer<RedPandaEntity, RedPandaModel
     }
 
     @Override
-    protected ResourceLocation getEntityTexture(RedPandaEntity entity) {
+    public ResourceLocation getEntityTexture(RedPandaEntity entity) {
         return resourceLocation;
     }
 }

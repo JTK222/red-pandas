@@ -1,6 +1,6 @@
-package com.mcmoddev.redpandas;
+package io.github.proxyneko.redpandas;
 
-import com.mcmoddev.redpandas.common.entities.RedPandaEntity;
+import io.github.proxyneko.redpandas.common.entities.RedPandaEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;

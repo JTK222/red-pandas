@@ -1,6 +1,6 @@
-package com.mcmoddev.redpandas.common.entities;
+package io.github.proxyneko.redpandas.common.entities;
 
-import com.mcmoddev.redpandas.RedPandas;
+import io.github.proxyneko.redpandas.RedPandas;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;

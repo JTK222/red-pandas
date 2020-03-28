@@ -1,7 +1,7 @@
-package com.mcmoddev.redpandas.client;
+package io.github.proxyneko.redpandas.client;
 
-import com.mcmoddev.redpandas.RedPandas;
-import com.mcmoddev.redpandas.common.entities.RedPandaEntity;
+import io.github.proxyneko.redpandas.RedPandas;
+import io.github.proxyneko.redpandas.common.entities.RedPandaEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,6 +14,6 @@ public class Rendering {
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(RedPandaEntity.class, RenderRedPanda::new);
+        RenderingRegistry.registerEntityRenderingHandler(RedPandas.RED_PANDA_ENTITY, RenderRedPanda::new);
     }
 }

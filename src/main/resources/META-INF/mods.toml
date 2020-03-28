@@ -1,7 +1,7 @@
 modLoader="javafml"
 loaderVersion="[28,)"
-updateJSONURL="https://raw.githubusercontent.com/MinecraftModDevelopmentMods/red-pandas/master/update.json"
-issueTrackerURL="https://github.com/MinecraftModDevelopmentMods/red-pandas/issues"
+updateJSONURL="https://raw.githubusercontent.com/ProxyNeko/red-pandas/master/update.json"
+issueTrackerURL="https://github.com/ProxyNeko/red-pandas/issues"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/red-pandas"
 logoFile=""
 credits="ProxyNeko"
@@ -18,12 +18,12 @@ A small mod with just Red Pandas coz why not they are so cute!
 [[dependencies.redpandas]]
    modId="forge"
    mandatory=true
-   versionRange="[28,)"
+   versionRange="[31,)"
    ordering="NONE"
    side="BOTH"
 [[dependencies.redpandas]]
    modId="minecraft"
    mandatory=true
-   versionRange="[1.14.4]"
+   versionRange="[1.15,]"
    ordering="NONE"
    side="BOTH"
