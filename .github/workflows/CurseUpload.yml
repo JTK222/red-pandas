@@ -32,7 +32,7 @@ jobs:
           files: build/libs/redpandas-${{ steps.build.outputs.version }}.jar
           gzip: false
       - name: Release on CurseForge
-        uses: itsmow/curseforge-upload@master
+        uses: itsmeow/curseforge-upload@master
         with:
           token: ${{ secrets.CF_API_TOKEN }}
           project_id: 336675
