@@ -55,7 +55,7 @@ public class RedPandaEntity extends AnimalEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        //TODO Edit or make some sounds for this mob so that we don't rely on the vanilla panda (Sounds too big/rough not small and cute)
+        //TODO Edit or make some sounds for this mob, don't rely on the vanilla (too big/rough not small and cute)
         return SoundEvents.ENTITY_PANDA_AMBIENT;
     }
 
@@ -84,6 +84,4 @@ public class RedPandaEntity extends AnimalEntity {
     public boolean isBreedingItem(ItemStack stack) {
         return TEMPTATION_ITEMS.test(stack);
     }
-
-
 }
