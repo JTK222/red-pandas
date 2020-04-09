@@ -35,7 +35,7 @@ public class RedPandas {
     public RedPandas() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::fingerprintViolation);
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
-        modLoadingContext.registerConfig(ModConfig.Type.SERVER, PandasConfig.SERVER_SPECIFICATION);
+        modLoadingContext.registerConfig(ModConfig.Type.COMMON, PandasConfig.SERVER_SPECIFICATION);
     }
 
     private void fingerprintViolation(FMLFingerprintViolationEvent event) {
