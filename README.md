@@ -5,9 +5,9 @@
 <a href="https://discord.mcmoddev.com"><img  
         src="https://img.shields.io/badge/Discord-MMD-green.svg?style=flat&logo=Discord"/></a>  
 <a href="https://www.curseforge.com/minecraft/mc-mods/red-pandas"><img  
-        src="https://cf.way2muchnoise.eu/full_red-pandas_downloads.svg"/></a>  
+        src="http://cf.way2muchnoise.eu/full_red-pandas_downloads.svg"/></a>  
 <a href="https://www.curseforge.com/minecraft/mc-mods/red-pandas"><img  
-        src="https://cf.way2muchnoise.eu/versions/Minecraft_red-pandas_all.svg"/></a>  
+        src="http://cf.way2muchnoise.eu/versions/Minecraft_red-pandas_all.svg"/></a>  
 </p>  
   
 <p align="center">  
