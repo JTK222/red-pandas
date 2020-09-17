@@ -1,92 +1,169 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven {
+            name = 'MinecraftForge Maven'
+            url = 'https://files.minecraftforge.net/maven'
+        }
+        maven {
+            name = 'Gradle Maven'
+            url = 'https://plugins.gradle.org/m2/'
+        }
         jcenter()
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
+        classpath group: 'com.diluv.schoomp', name: 'Schoomp', version: "${project.schoomp_version}"
     }
 }
-apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+
+apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'com.matthewprenger.cursegradle'
+
+import com.diluv.schoomp.Webhook
+import com.diluv.schoomp.message.Message
+import com.diluv.schoomp.message.embed.Embed
 
 version = "${project.mc_version}-${project.mod_version}"
-group = "${project.maven_group}"
+group = "${project.group}"
 archivesBaseName = "${project.mod_id}"
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
+sourceSets {
+    api
+    main
+    test
+}
+
 minecraft {
     mappings channel: project.mappings_channel, version: "${project.mappings_version}-${project.mappings_mc_version}"
+    if (project.hasProperty('at_file')) {
+        accessTransformer = file("src/main/resources/META-INF/${project.at_file}.cfg")
+    }
 
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                redpandas {
-                    source sourceSets.main
-                }
-            }
+            property 'forge.logging.console.level', "info"
+            mods.create("${project.mod_id}").source(sourceSets.main)
         }
 
         server {
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', "info"
+            mods.create("${project.mod_id}").source(sourceSets.main)
+        }
 
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                redpandas {
-                    source sourceSets.main
-                }
-            }
+        //Used for Data Generators should you need to use them to create recipes, blockstate files and other resources.
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'info'
+            args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
+            mods.create("${project.mod_id}").source(sourceSets.main)
         }
     }
 }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
-}
+apply from: 'scripts/dependencies.gradle'
+apply from: 'scripts/jar_artifacts.gradle'
 
-// Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
-        attributes([
-            "Specification-Title": archivesBaseName,
-            "Specification-Vendor": "ProxyNeko",
-            "Specification-Version": "${project.mod_version}", // We are version 1 of ourselves
-            "Implementation-Title": archivesBaseName,
-            "Implementation-Version": "${project.mod_version}",
-            "Implementation-Vendor" :"ProxyNeko",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
+        mainAttributes(
+                "Maven-Artifact": "${project.group}:${archivesBaseName}:${project.mod_version}",
+                "Timestamp": System.currentTimeMillis(),
+                "Specification-Title": archivesBaseName,
+                "Specification-Vendor": "${project.mod_author}",
+                "Specification-Version": "1",
+                "Implementation-Title": archivesBaseName,
+                "Implementation-Version": "${project.mod_version}",
+                "Implementation-Vendor": "${project.mod_author}",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "Built-On-Java": "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                "Built-On": "${project.mc_version}-${project.forge_version}"
+        )
+
+        if (project.hasProperty('core_plugin')) {
+            attributes 'FMLCorePluginContainsFMLMod': 'true'
+            attributes 'FMLCorePlugin': project.core_plugin
+        }
+
+        if (project.hasProperty('mod_at_file')) {
+            attributes 'FMLAT': project.mod_at_file
+        }
+
+        if (project.hasProperty('mod_contained_deps')) {
+            attributes 'ContainedDeps': project.mod_contained_deps
+        }
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar') 
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
+tasks.publish.dependsOn build
+tasks.curseforge.dependsOn publish
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.mod_version
+            from components.java
+
+            if (getBooleanProperty('create_source_jar')) {
+                artifact sourceJar {
+                    classifier 'sources'
+                }
+            }
+
+
+            if (getBooleanProperty('create_deobf_jar')) {
+                artifact deobfJar {
+                    classifier 'deobf'
+                }
+            }
+
+            if (getBooleanProperty('create_javadoc_jar')) {
+                artifact javadocJar {
+                    classifier 'javadoc'
+                }
+            }
+
+            if (getBooleanProperty('create_api_jar')) {
+                artifact apiJar {
+                    classifier 'api'
+                }
+            }
+
+            pom {
+                name = project.mod_id
+                url = project.website_url
+                packaging = 'jar'
+                scm {
+                    connection = "scm:git:git://github.com/" + project.repo + ".git"
+                    developerConnection = "scm:git:git@github.com:" + project.repo + ".git"
+                    url = "https://github.com/" + project.repo
+                }
+                issueManagement {
+                    system = 'github'
+                    url = "https://github.com/" + project.repo + "/issues"
+                }
+                organization {
+                    name = project.org_name
+                    url = project.website_url
+                }
+            }
         }
     }
     repositories {
@@ -96,10 +173,146 @@ publishing {
     }
 }
 
-task setupGithubActions() {
-    doLast {
-        exec {
-            commandLine "echo", "##[set-output name=version;]${project.version}";
+curseforge {
+    if (project.hasProperty('curseforge_project_id')) {
+        apiKey = secret.curseforgeAPIKey
+        project {
+            id = project.project_id
+            if (project.hasProperty('changelog')) {
+                changelog = file(project.changelog)
+            } else {
+                changelog = ''
+            }
+
+            if (project.hasProperty('changelog_type')) {
+                changelogType = project.changelog_type
+            }
+
+            if ((project.hasProperty('release_type')) && ((project.release_type == 'alpha') || (project.release_type == 'beta') || (project.release_type == 'release'))) {
+                releaseType = project.release_type
+            } else {
+                releaseType = 'alpha'
+            }
+
+            if (project.hasProperty('curseforge_versions')) {
+                final def versions = "${project.curseforge_versions}".split(', ')
+                versions.each {
+                    addGameVersion "${it}"
+                }
+            }
+            mainArtifact(jar) {
+                if (getBooleanProperty('curseforge_use_custom_display_name')) {
+                    displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version}"
+                }
+
+                if (project.hasProperty('curseforge_requirements') || project.hasProperty('curseforge_optionals') || project.hasProperty('curseforge_embeddeds') || project.hasProperty('curseforge_tools') || project.hasProperty('curseforge_incompatibles') || project.hasProperty('curseforge_includes')) {
+                    relations {
+                        if (project.hasProperty('curseforge_requirements')) {
+                            final def requirements = "${project.curseforge_requirements}".split(', ')
+                            requirements.each {
+                                requiredDependency "${it}"
+                            }
+                        }
+
+                        if (project.hasProperty('curseforge_optionals')) {
+                            final def optionals = "${project.curseforge_optionals}".split(', ')
+                            optionals.each {
+                                optionalDependency "${it}"
+                            }
+                        }
+
+                        if (project.hasProperty('curseforge_embeddeds')) {
+                            final def embeddeds = "${project.curseforge_embeddeds}".split(', ')
+                            embeddeds.each {
+                                embeddedLibrary "${it}"
+                            }
+                        }
+
+                        if (project.hasProperty('curseforge_tools')) {
+                            final def tools = "${project.curseforge_tools}".split(', ')
+                            tools.each {
+                                tool "${it}"
+                            }
+                        }
+
+                        if (project.hasProperty('curseforge_incompatibles')) {
+                            final def incompatibles = "${project.curseforge_incompatibles}".split(', ')
+                            incompatibles.each {
+                                incompatible "${it}"
+                            }
+                        }
+
+                        if (project.hasProperty('curseforge_includes')) {
+                            final def includes = "${project.curseforge_includes}".split(', ')
+                            includes.each {
+                                include "${it}"
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (getBooleanProperty('create_api_jar')) {
+                addArtifact(apiJar) {
+                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
+                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} API"
+                    }
+                }
+            }
+
+            if (getBooleanProperty('create_source_jar')) {
+                addArtifact(sourceJar) {
+                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
+                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Sources"
+                    }
+                }
+            }
+
+            if (getBooleanProperty('create_deobf_jar')) {
+                addArtifact(deobfJar) {
+                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
+                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Development"
+                    }
+                }
+            }
+
+            if (getBooleanProperty('create_javadoc_jar')) {
+                addArtifact(javadocJar) {
+                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
+                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Javadoc"
+                    }
+                }
+            }
         }
+    }
+}
+
+tasks.getByName("build").doLast {
+    try {
+        //Reads the file ID given to us by CurseForge
+        def newFileId = tasks.getByName("curseforge${project_id}").property('mainArtifact').fileID
+        def webhook = new Webhook(findProperty('curseforge_webhook'), "${project.findProperty('mod_name')} Gradle Upload")
+
+        def message = new Message()
+        message.setUsername(project.mod_name)
+        def embed = new Embed()
+        embed.addField("${project.mod_name} ${project.mod_version}", "For Minecraft ${project.mc_version} has been uploaded to CurseForge.", false)
+        embed.addField('Download:', "${project.curseforge_url}/files/$newFileId", false)
+        embed.addField('Changelog:', "${project.changelog}", false)
+        embed.setColor(0xFF8000)
+        message.addEmbed(embed)
+        webhook.sendMessage(message)
+    }
+
+    catch (IOException exception) {
+        println 'Failed to push to the Discord webhook. You may be missing properties needed for the tasks to finish.'
+    }
+}
+
+boolean getBooleanProperty(final String property) {
+    if (project.hasProperty(property)) {
+        return ((String) project.findProperty(property)).toBoolean()
+    } else {
+        return false
     }
 }

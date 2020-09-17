@@ -1,7 +1,7 @@
-package io.github.proxyneko.redpandas;
+package cat.tophat.redpandas;
 
-import io.github.proxyneko.redpandas.common.PandasConfig;
-import io.github.proxyneko.redpandas.common.entities.RedPandaEntity;
+import cat.tophat.redpandas.common.PandasConfig;
+import cat.tophat.redpandas.common.entities.RedPandaEntity;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
@@ -18,30 +18,18 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLFingerprintViolationEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.awt.*;
+import java.awt.Color;
 
 @Mod(RedPandas.MODID)
 @EventBusSubscriber(bus = Bus.MOD)
 public class RedPandas {
 
     public static final String MODID = "redpandas";
-    private static final Logger LOGGER = LogManager.getLogger("Red Pandas");
 
     public RedPandas() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::fingerprintViolation);
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         modLoadingContext.registerConfig(ModConfig.Type.COMMON, PandasConfig.SERVER_SPECIFICATION);
-    }
-
-    private void fingerprintViolation(FMLFingerprintViolationEvent event) {
-        LOGGER.warn("Invalid fingerprint detected! The file " + event.getSource().getName() + " may have been " +
-                "tampered with. This version will NOT be supported! Please download the mod from CurseForge for a " +
-                "supported and signed version of the mod.");
     }
 
     public static final EntityType<RedPandaEntity> RED_PANDA_ENTITY = (EntityType<RedPandaEntity>)

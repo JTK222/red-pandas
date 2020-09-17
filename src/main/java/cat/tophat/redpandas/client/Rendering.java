@@ -1,7 +1,6 @@
-package io.github.proxyneko.redpandas.client;
+package cat.tophat.redpandas.client;
 
-import io.github.proxyneko.redpandas.RedPandas;
-import io.github.proxyneko.redpandas.common.entities.RedPandaEntity;
+import cat.tophat.redpandas.RedPandas;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

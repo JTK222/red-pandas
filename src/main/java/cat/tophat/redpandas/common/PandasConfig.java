@@ -1,4 +1,4 @@
-package io.github.proxyneko.redpandas.common;
+package cat.tophat.redpandas.common;
 
 import com.google.common.collect.Lists;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -27,7 +27,8 @@ public class PandasConfig {
             RedPandaSpawnNaturally = builder.comment("If Red Pandas should spawn naturally in the world.")
                     .define("enableNaturalSpawning", true);
 
-            RedPandaSpawnWeight = builder.comment("If -1, the default spawn weight will be used. (The heigher the value the more will spawn)")
+            RedPandaSpawnWeight = builder.comment("If -1, the default spawn weight will be used. "
+                    + "(The higher the value the more will spawn)")
                     .defineInRange("spawnWeight", 4, -1, Integer.MAX_VALUE);
 
             BiomeWhitelist = builder.comment("If biomes are specified here,"

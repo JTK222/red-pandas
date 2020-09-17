@@ -1,0 +1,39 @@
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        name = 'Forge Maven'
+        url = 'https://files.minecraftforge.net/maven'
+    }
+
+    maven {
+        name = 'Minecraft Mod Development Maven'
+        url = 'https://maven.mcmoddev.com'
+    }
+
+    maven {
+        name = 'TehNuts Maven'
+        url = 'https://maven.tehnut.info'
+    }
+
+    maven {
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+
+    maven {
+        name = 'TheIllusiveC4s Maven'
+        url = "https://maven.theillusivec4.top/"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
+    //Examples.
+    //compile fg.deobf("net.darkhax.bookshelf:Bookshelf-${project.bookshelf_version}")
+    //runtimeOnly fg.deobf("mezz.jei:jei-${project.jei_version}")
+    //compileOnly fg.deobf("mezz.jei:jei-${project.jei_version}:api")
+    //compile fg.deobf("top.theillusivec4.curios:curios:FORGE-${project.curios_version}")
+}

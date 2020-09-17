@@ -1,6 +1,6 @@
-package io.github.proxyneko.redpandas.common.entities;
+package cat.tophat.redpandas.common.entities;
 
-import io.github.proxyneko.redpandas.RedPandas;
+import cat.tophat.redpandas.RedPandas;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
@@ -24,6 +24,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class RedPandaEntity extends AnimalEntity {
@@ -50,17 +51,16 @@ public class RedPandaEntity extends AnimalEntity {
     protected void registerAttributes() {
         super.registerAttributes();
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        //TODO Edit or make some sounds for this mob, don't rely on the vanilla (too big/rough not small and cute)
         return SoundEvents.ENTITY_PANDA_AMBIENT;
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
+    protected SoundEvent getHurtSound(@Nonnull DamageSource source) {
         return SoundEvents.ENTITY_PANDA_HURT;
     }
 
@@ -70,18 +70,18 @@ public class RedPandaEntity extends AnimalEntity {
     }
 
     @Override
-    protected void playStepSound(BlockPos pos, BlockState state) {
+    protected void playStepSound(@Nonnull BlockPos pos, @Nonnull BlockState state) {
         playSound(SoundEvents.ENTITY_PANDA_STEP, 0.10F, 2.0F);
     }
 
     @Nullable
     @Override
-    public AgeableEntity createChild(AgeableEntity ageableEntity) {
+    public AgeableEntity createChild(@Nonnull AgeableEntity ageableEntity) {
         return RedPandas.RED_PANDA_ENTITY.create(world);
     }
 
     @Override
-    public boolean isBreedingItem(ItemStack stack) {
+    public boolean isBreedingItem(@Nonnull ItemStack stack) {
         return TEMPTATION_ITEMS.test(stack);
     }
 }
