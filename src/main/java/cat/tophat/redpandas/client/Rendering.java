@@ -1,6 +1,7 @@
 package cat.tophat.redpandas.client;
 
 import cat.tophat.redpandas.RedPandas;
+import cat.tophat.redpandas.common.entities.RedPandaEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,6 +14,6 @@ public class Rendering {
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(RedPandas.RED_PANDA_ENTITY, RenderRedPanda::new);
+        RenderingRegistry.registerEntityRenderingHandler(RedPandaEntity.class, RenderRedPanda::new);
     }
 }

@@ -2,7 +2,7 @@ package cat.tophat.redpandas.client;
 
 import cat.tophat.redpandas.RedPandas;
 import cat.tophat.redpandas.common.entities.RedPandaEntity;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.util.ResourceLocation;
@@ -22,12 +22,11 @@ public class RenderRedPanda extends LivingRenderer<RedPandaEntity, RedPandaModel
     }
 
     @Override
-    protected void preRenderCallback(@Nonnull RedPandaEntity entity, @Nonnull MatrixStack matrixStack,
-                                     float partialTickTime) {
+    protected void preRenderCallback(@Nonnull RedPandaEntity entity, float partialTickTime) {
         if (this.entityModel.isChild) {
-            matrixStack.scale(0.65F, 0.65F, 0.65F);
+            GlStateManager.scaled(0.65F, 0.65F, 0.65F);
         } else {
-            matrixStack.scale(1.0F, 1.0F, 1.0F);
+            GlStateManager.scaled(1.0F, 1.0F, 1.0F);
         }
     }
 
