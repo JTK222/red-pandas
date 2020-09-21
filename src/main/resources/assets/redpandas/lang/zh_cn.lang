@@ -1,5 +1,2 @@
-  
-{
-  "entity.redpandas.red_panda": "小熊猫",
-  "item.redpandas.red_panda_spawn_egg": "小熊猫刷怪蛋"
-}
+entity.redpandas.red_panda.name=小熊猫
+item.redpandas.red_panda_spawn_egg.name=小熊猫刷怪蛋
