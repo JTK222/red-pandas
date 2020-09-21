@@ -76,6 +76,20 @@ minecraft {
     }
 }
 
+processResources {
+    //This will ensure that this task is redone when the versions change.
+    inputs.property "version", project.mod_version
+    inputs.property "mcversion", project.mc_version
+
+    //Replace stuff in mcmod.info, nothing more.
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        //Replace version and mcversion.
+        expand 'version':project.mod_version, 'mcversion':project.mc_version
+    }
+}
+
 apply from: 'scripts/dependencies.gradle'
 apply from: 'scripts/jar_artifacts.gradle'
 

@@ -2,57 +2,55 @@ package cat.tophat.redpandas;
 
 import cat.tophat.redpandas.common.PandasConfig;
 import cat.tophat.redpandas.common.entities.RedPandaEntity;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntitySpawnPlacementRegistry;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.SpawnEggItem;
+import com.google.common.collect.Sets;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.Heightmap;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.awt.Color;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@Mod(RedPandas.MODID)
-@EventBusSubscriber(bus = Bus.MOD)
+@Mod(modid = RedPandas.MODID, name = "Red Pandas", version = "1.0.3", acceptedMinecraftVersions = "[1.12,1.12.2]")
+@EventBusSubscriber(modid = RedPandas.MODID)
 public class RedPandas {
 
     public static final String MODID = "redpandas";
 
-    public RedPandas() {
-        ModLoadingContext modLoadingContext = ModLoadingContext.get();
-        modLoadingContext.registerConfig(ModConfig.Type.COMMON, PandasConfig.SERVER_SPECIFICATION);
-    }
-
-    public static final EntityType<RedPandaEntity> RED_PANDA_ENTITY = (EntityType<RedPandaEntity>)
-            EntityType.Builder.create(RedPandaEntity::new, EntityClassification.CREATURE)
-                    .size(0.90F, 0.60F)
-                    .setTrackingRange(80)
-                    .setUpdateInterval(1)
-                    .setShouldReceiveVelocityUpdates(true)
-                    .build(RedPandas.MODID + ":red_panda")
-                    .setRegistryName(new ResourceLocation(RedPandas.MODID, "red_panda"));
-
     @SubscribeEvent
-    public static void registerEntity(RegistryEvent.Register<EntityType<?>> event) {
-        event.getRegistry().register(RED_PANDA_ENTITY);
+    public static void registerEntity(RegistryEvent.Register<EntityEntry> event) {
 
-        EntitySpawnPlacementRegistry.register(RED_PANDA_ENTITY,
-                EntitySpawnPlacementRegistry.PlacementType.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CreatureEntity::canSpawnOn);
-    }
+        EntityEntryBuilder<Entity> RED_PANDA_ENTRY = EntityEntryBuilder.create()
+                .entity(RedPandaEntity.class)
+                .factory(RedPandaEntity::new)
+                .id(new ResourceLocation(MODID, "red_panda"), 0)
+                .name(MODID + ".red_panda")
+                .tracker(80, 1, true)
+                .egg(Color.RED.getRGB(), Color.BLACK.getRGB());
 
-    @SubscribeEvent
-    public static void onItemRegistry(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new SpawnEggItem(RED_PANDA_ENTITY, Color.RED.getRGB(), Color.BLACK.getRGB(),
-                new Item.Properties().group(ItemGroup.MISC)).setRegistryName(MODID + ":red_panda_spawn_egg"));
+        Collection<Biome> biomes = ForgeRegistries.BIOMES.getValuesCollection();
+
+        if (PandasConfig.biomeWhitelist != null && PandasConfig.biomeWhitelist.length > 0) {
+            Set<String> whitelist = Sets.newHashSet(PandasConfig.biomeWhitelist);
+            biomes = biomes.stream().filter(b -> whitelist.contains(b.getRegistryName()
+                    .toString())).collect(Collectors.toList());
+        } else if (PandasConfig.biomeBlacklist != null && PandasConfig.biomeBlacklist.length > 0) {
+            Set<String> blacklist = Sets.newHashSet(PandasConfig.biomeBlacklist);
+            biomes = biomes.stream().filter(b -> !blacklist.contains(b.getRegistryName()
+                    .toString())).collect(Collectors.toList());
+        }
+
+        RED_PANDA_ENTRY.spawn(EnumCreatureType.CREATURE, PandasConfig.spawnWeight, 1, 5, biomes);
+
+        event.getRegistry().register(RED_PANDA_ENTRY.build());
     }
 }
