@@ -175,7 +175,6 @@ publishing {
 
 curseforge {
     if (project.hasProperty('curseforge_project_id')) {
-        apiKey = secret.curseforgeAPIKey
         project {
             id = project.project_id
             if (project.hasProperty('changelog')) {
@@ -291,7 +290,7 @@ tasks.getByName("curseforge").doLast {
     try {
         //Reads the file ID given to us by CurseForge
         def newFileId = tasks.getByName("curseforge${project_id}").property('mainArtifact').fileID
-        def webhook = new Webhook(findProperty('curseforge_webhook'), "${project.findProperty('mod_name')} Gradle Upload")
+        def webhook = new Webhook(discordWebhook, "${project.findProperty('mod_name')} Gradle Upload")
 
         def message = new Message()
         message.setUsername(project.mod_name)
