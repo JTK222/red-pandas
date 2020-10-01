@@ -4,7 +4,9 @@ import cat.tophat.redpandas.RedPandas;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.ai.goal.FollowParentGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
@@ -23,6 +25,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,11 +50,10 @@ public class RedPandaEntity extends AnimalEntity {
         goalSelector.addGoal(7, new LookRandomlyGoal(this));
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
+    public static AttributeModifierMap.MutableAttribute attributes() {
+        return MobEntity.func_233666_p_()
+                .createMutableAttribute(Attributes.MAX_HEALTH, 20.0D)
+                .createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.3F);
     }
 
     @Override
@@ -75,8 +77,8 @@ public class RedPandaEntity extends AnimalEntity {
     }
 
     @Nullable
-    @Override
-    public AgeableEntity createChild(@Nonnull AgeableEntity ageableEntity) {
+    @Override //createChild
+    public AgeableEntity func_241840_a(ServerWorld world, @Nonnull AgeableEntity ageableEntity) {
         return RedPandas.RED_PANDA_ENTITY.create(world);
     }
 

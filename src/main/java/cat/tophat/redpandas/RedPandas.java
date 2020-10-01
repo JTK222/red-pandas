@@ -1,6 +1,7 @@
 package cat.tophat.redpandas;
 
 import cat.tophat.redpandas.common.PandasConfig;
+import cat.tophat.redpandas.common.RedPandaEvents;
 import cat.tophat.redpandas.common.entities.RedPandaEntity;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityClassification;
@@ -11,7 +12,9 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.Heightmap;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -30,6 +33,7 @@ public class RedPandas {
     public RedPandas() {
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         modLoadingContext.registerConfig(ModConfig.Type.COMMON, PandasConfig.SERVER_SPECIFICATION);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, RedPandaEvents::biomeLoad);
     }
 
     public static final EntityType<RedPandaEntity> RED_PANDA_ENTITY = (EntityType<RedPandaEntity>)

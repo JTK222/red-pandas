@@ -4,7 +4,7 @@ updateJSONURL="https://tophat.cat/red-pandas/update.json"
 issueTrackerURL="https://github.com/tophatcats-mods/red-pandas/issues"
 displayURL="https://tophat.cat/red-pandas/"
 license="GNU Lesser General Public License 2.1"
-logoFile=""
+#logoFile=""
 credits="ProxyNeko"
 authors="ProxyNeko"
 
@@ -25,6 +25,6 @@ A small mod with just Red Pandas coz why not they are so cute!
 [[dependencies.redpandas]]
    modId="minecraft"
    mandatory=true
-   versionRange="[1.15,]"
+   versionRange="[1.16.3,]"
    ordering="NONE"
    side="BOTH"
