@@ -2,6 +2,7 @@ package cat.tophat.redpandas;
 
 import cat.tophat.redpandas.common.PandasConfig;
 import cat.tophat.redpandas.common.entities.RedPandaEntity;
+import cat.tophat.redpandas.data.Translations;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
@@ -18,6 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 
 import java.awt.Color;
 
@@ -54,5 +56,10 @@ public class RedPandas {
     public static void onItemRegistry(RegistryEvent.Register<Item> event) {
         event.getRegistry().register(new SpawnEggItem(RED_PANDA_ENTITY, Color.RED.getRGB(), Color.BLACK.getRGB(),
                 new Item.Properties().group(ItemGroup.MISC)).setRegistryName(MODID + ":red_panda_spawn_egg"));
+    }
+
+    @SubscribeEvent
+    public static void onGatherData(GatherDataEvent event) {
+        if(event.includeClient()) for(String locale : new String[] {"es_es", "fr_fr"}) event.getGenerator().addProvider(new Translations(event.getGenerator(), locale));
     }
 }

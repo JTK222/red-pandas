@@ -42,6 +42,7 @@ sourceSets {
     api
     main
     test
+    main.resources.srcDirs += 'src/generated/resources'
 }
 
 minecraft {
