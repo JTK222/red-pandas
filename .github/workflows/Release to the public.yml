@@ -1,0 +1,25 @@
+name: Release on tag to CurseForge.
+
+on:
+  push:
+    tags:
+      - 'v*-*'
+
+jobs:
+  build:
+    env:
+      apiKey: ${{ secrets.CURSE_API_KEY }}
+      discordWebhook: ${{ secrets.DISCORD_WEBHOOK }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Setup Build
+        run: chmod 777 gradlew
+        
+      - name: Push to CurseForge
+        run: ./gradlew curseforge
