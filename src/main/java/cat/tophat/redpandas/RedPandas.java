@@ -4,7 +4,7 @@ import cat.tophat.redpandas.common.PandasConfig;
 import cat.tophat.redpandas.common.RedPandaEvents;
 import cat.tophat.redpandas.common.entities.RedPandaEntity;
 import cat.tophat.redpandas.data.Translations;
-import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
@@ -44,8 +44,10 @@ public class RedPandas {
                     .setTrackingRange(80)
                     .setUpdateInterval(1)
                     .setShouldReceiveVelocityUpdates(true)
-                    .build(RedPandas.MODID + ":red_panda")
-                    .setRegistryName(new ResourceLocation(RedPandas.MODID, "red_panda"));
+                    .build(RedPandas.MODID + ":red_panda");
+    static {
+        RED_PANDA_ENTITY.setRegistryName(new ResourceLocation(RedPandas.MODID, "red_panda"));
+    }
 
     @SubscribeEvent
     public static void registerEntity(RegistryEvent.Register<EntityType<?>> event) {
@@ -53,7 +55,7 @@ public class RedPandas {
 
         EntitySpawnPlacementRegistry.register(RED_PANDA_ENTITY,
                 EntitySpawnPlacementRegistry.PlacementType.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CreatureEntity::canSpawnOn);
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobEntity::canSpawnOn);
     }
 
     @SubscribeEvent
