@@ -19,7 +19,12 @@ public class PandasConfig {
 
     public static class ServerConfig {
         public final ForgeConfigSpec.BooleanValue redPandaSpawnNaturally;
+        public final ForgeConfigSpec.BooleanValue redPandaUseSpawnCost;
         public final ForgeConfigSpec.IntValue redPandaSpawnWeight;
+        public final ForgeConfigSpec.IntValue redPandaSpawnMinGroup;
+        public final ForgeConfigSpec.IntValue redPandaSpawnMaxGroup;
+        public final ForgeConfigSpec.DoubleValue redPandaSpawnCostPer;
+        public final ForgeConfigSpec.DoubleValue redPandaSpawnCostMax;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> biomeWhitelist;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> biomeBlacklist;
 
@@ -27,9 +32,23 @@ public class PandasConfig {
             redPandaSpawnNaturally = builder.comment("If Red Pandas should spawn naturally in the world.")
                     .define("enableNaturalSpawning", true);
 
-            redPandaSpawnWeight = builder.comment("If -1, the default spawn weight will be used. "
-                    + "(The higher the value the more will spawn)")
-                    .defineInRange("spawnWeight", 4, -1, Integer.MAX_VALUE);
+            redPandaSpawnWeight = builder.comment("The higher the value the more likely a Red Panda is to spawn (as opposed to spawning another entity in its place)")
+                    .defineInRange("spawnWeight", 7, 0, Integer.MAX_VALUE);
+
+            redPandaSpawnMinGroup = builder.comment("The minimum group size for spawning red pandas.")
+            .defineInRange("spawnMinGroup", 1, 1, Integer.MAX_VALUE);
+
+            redPandaSpawnMaxGroup = builder.comment("The maximum group size for spawning red pandas. Must be greater than or equal to the minimum")
+            .defineInRange("spawnMaxGroup", 5, 1, Integer.MAX_VALUE);
+
+            redPandaUseSpawnCost = builder.comment("If Red Pandas should utilize spawn costs or not.")
+            .define("spawnCostEnabled", false);
+
+            redPandaSpawnCostPer = builder.comment("The spawn cost per red panda spawned.")
+            .defineInRange("spawnCostPer", 1, Double.MIN_NORMAL, Double.MAX_VALUE);
+
+            redPandaSpawnCostMax = builder.comment("The maximum spawn cost that can be spent on red pandas.")
+            .defineInRange("spawnCostMax", 0.2, Double.MIN_NORMAL, Double.MAX_VALUE);
 
             biomeWhitelist = builder.comment("If biomes are specified here,"
                     + " Red Pandas will ONLY spawn in these biomes. (The blacklist is ignored while this is set!)")
