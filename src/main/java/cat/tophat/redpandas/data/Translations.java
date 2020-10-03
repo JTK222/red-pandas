@@ -25,8 +25,8 @@ public class Translations extends LanguageProvider {
         }
     }
 
-    private void addTranslation(String red_panda, String red_panda_spawn_egg) {
-        add(RedPandas.RED_PANDA_ENTITY, red_panda);
-        add("item.redpandas.red_panda_spawn_egg", red_panda_spawn_egg);
+    private void addTranslation(String redPanda, String redPandaSpawnEgg) {
+        add(RedPandas.RED_PANDA_ENTITY, redPanda);
+        add("item.redpandas.red_panda_spawn_egg", redPandaSpawnEgg);
     }
 }

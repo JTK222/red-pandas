@@ -40,18 +40,18 @@ public class RedPandaEvents {
             return;
         }
 
-        if (PandasConfig.SERVER.RedPandaSpawnNaturally.get()) {
-            currentWeight = PandasConfig.SERVER.RedPandaSpawnWeight.get();
+        if (PandasConfig.SERVER.redPandaSpawnNaturally.get()) {
+            currentWeight = PandasConfig.SERVER.redPandaSpawnWeight.get();
 
             if (currentWeight > 0) {
-                if (PandasConfig.SERVER.BiomeWhitelist.get() != null
-                        && PandasConfig.SERVER.BiomeWhitelist.get().size() > 0) {
-                    Set<String> whitelist = Sets.newHashSet(PandasConfig.SERVER.BiomeWhitelist.get());
+                if (PandasConfig.SERVER.biomeWhitelist.get() != null
+                        && !PandasConfig.SERVER.biomeWhitelist.get().isEmpty()) {
+                    Set<String> whitelist = Sets.newHashSet(PandasConfig.SERVER.biomeWhitelist.get());
                     allowBiome = b -> whitelist.contains(b.toString());
                 } else {
-                    if (PandasConfig.SERVER.BiomeBlacklist.get() != null
-                            && PandasConfig.SERVER.BiomeBlacklist.get().size() > 0) {
-                        Set<String> blacklist = Sets.newHashSet(PandasConfig.SERVER.BiomeBlacklist.get());
+                    if (PandasConfig.SERVER.biomeBlacklist.get() != null
+                            && !PandasConfig.SERVER.biomeBlacklist.get().isEmpty()) {
+                        Set<String> blacklist = Sets.newHashSet(PandasConfig.SERVER.biomeBlacklist.get());
                         allowBiome = b -> !blacklist.contains(b.toString());
                     }
                 }

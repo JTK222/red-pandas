@@ -18,27 +18,27 @@ public class PandasConfig {
     }
 
     public static class ServerConfig {
-        public final ForgeConfigSpec.BooleanValue RedPandaSpawnNaturally;
-        public final ForgeConfigSpec.IntValue RedPandaSpawnWeight;
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> BiomeWhitelist;
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> BiomeBlacklist;
+        public final ForgeConfigSpec.BooleanValue redPandaSpawnNaturally;
+        public final ForgeConfigSpec.IntValue redPandaSpawnWeight;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> biomeWhitelist;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> biomeBlacklist;
 
         ServerConfig(ForgeConfigSpec.Builder builder) {
-            RedPandaSpawnNaturally = builder.comment("If Red Pandas should spawn naturally in the world.")
+            redPandaSpawnNaturally = builder.comment("If Red Pandas should spawn naturally in the world.")
                     .define("enableNaturalSpawning", true);
 
-            RedPandaSpawnWeight = builder.comment("If -1, the default spawn weight will be used. "
+            redPandaSpawnWeight = builder.comment("If -1, the default spawn weight will be used. "
                     + "(The higher the value the more will spawn)")
                     .defineInRange("spawnWeight", 4, -1, Integer.MAX_VALUE);
 
-            BiomeWhitelist = builder.comment("If biomes are specified here,"
+            biomeWhitelist = builder.comment("If biomes are specified here,"
                     + " Red Pandas will ONLY spawn in these biomes. (The blacklist is ignored while this is set!)")
                     .defineList("whitelist", Lists.newArrayList(
                             "minecraft:bamboo_jungle",
                             "minecraft:bamboo_jungle_hills"
                     ), o -> o instanceof String);
 
-            BiomeBlacklist = builder.comment("If the whitelist is not used, use this list to specify the"
+            biomeBlacklist = builder.comment("If the whitelist is not used, use this list to specify the"
                     + " biomes that Red Pandas should not spawn in.")
                     .defineList("blacklist",
                             Lists.newArrayList(
