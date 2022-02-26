@@ -1,0 +1,19 @@
+import java.text.SimpleDateFormat
+
+license {
+    header = project.file('LicenseHeader.md')
+    include '**/*.java'
+    include '**/*.kt'
+    exclude '**/package-info.java'
+    exclude '**/module-info.java'
+    newLine = false
+    properties {
+        year = currentCopyrightYear()
+    }
+}
+
+static def currentCopyrightYear() {
+    def dateFormat = new SimpleDateFormat('yyyy')
+    dateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
+    return dateFormat.format(new Date())
+}

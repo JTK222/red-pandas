@@ -1,0 +1,49 @@
+# Disable autocrlf on generated files, they always generate with LF
+# Add any extra files or paths here to make git stop saying they
+# are changed when only line endings change.
+src/generated/**/.cache/cache text eol=lf
+src/generated/**/*.json text eol=lf
+
+*            text=auto
+
+*.bat        text eol=crlf
+#*.bat        text eol=lf
+*.gradle     text diff=java
+mcmod.info   text
+*.java       text
+*.json       text
+*.lang       text
+*.mcmeta     text
+*.md         text
+*.properties text
+gradlew      text eol=lf
+*.sh         text eol=lf
+*.txt        text
+*.xml        text
+*.yml        text
+*.yaml       text
+*.toml       text
+
+# Documents
+*.pdf  binary
+
+# Graphics
+*.eps  binary
+*.gif  binary
+*.ico  binary
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.psd  binary
+# SVG treated as an asset (binary) by default. If you want to treat it as text,
+# comment-out the following line and uncomment the line after.
+*.svg  binary
+#*.svg text
+*.tif  binary
+*.tiff binary
+*.webp binary
+*.xcf  binary
+
+# Other
+*.exe binary
+*.jar binary

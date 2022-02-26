@@ -1,12 +1,12 @@
 modLoader="javafml"
-loaderVersion="[31,)"
-updateJSONURL="https://tophat.cat/red-pandas/update.json"
+loaderVersion="[37,)"
+updateJSONURL="https://tophatcat.dev/red-pandas/update.json"
 issueTrackerURL="https://github.com/tophatcats-mods/red-pandas/issues"
-displayURL="https://tophat.cat/red-pandas/"
+displayURL="https://tophatcat.dev/red-pandas/"
 license="GNU Lesser General Public License 2.1"
+credits="KiriCattus"
+authors="KiriCattus"
 #logoFile=""
-credits="ProxyNeko"
-authors="ProxyNeko"
 
 [[mods]]
 modId="redpandas"
@@ -19,12 +19,12 @@ A small mod with just Red Pandas coz why not they are so cute!
 [[dependencies.redpandas]]
    modId="forge"
    mandatory=true
-   versionRange="[31,)"
+   versionRange="[37,)"
    ordering="NONE"
    side="BOTH"
 [[dependencies.redpandas]]
    modId="minecraft"
    mandatory=true
-   versionRange="[1.16.3,]"
+   versionRange="[1.17,]"
    ordering="NONE"
    side="BOTH"

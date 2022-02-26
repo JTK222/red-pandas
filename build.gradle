@@ -1,318 +1,133 @@
-buildscript {
-    repositories {
-        maven {
-            name = 'MinecraftForge Maven'
-            url = 'https://files.minecraftforge.net/maven'
-        }
-        maven {
-            name = 'Gradle Maven'
-            url = 'https://plugins.gradle.org/m2/'
-        }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
-        classpath group: 'com.diluv.schoomp', name: 'Schoomp', version: "${project.schoomp_version}"
-    }
+import net.minecraftforge.gradle.userdev.tasks.RenameJarInPlace
+
+plugins {
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'org.cadixdev.licenser' version '0.6.1'
 }
 
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'com.matthewprenger.cursegradle'
+apply from: 'gradle/license.gradle'
+apply from: 'gradle/version.gradle'
 
-import com.diluv.schoomp.Webhook
-import com.diluv.schoomp.message.Message
-import com.diluv.schoomp.message.embed.Embed
+version = versions.getVersion()
+println "Mod version: $version"
 
-version = "${project.mc_version}-${project.mod_version}"
-group = "${project.group}"
-archivesBaseName = "${project.mod_id}"
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+// If you expect that you will ever need to publish releases for old Minecraft versions, set the custom prefix:
+//versions {
+//    customPrefix = mc_version // or some other variable/string which is the custom tag prefix
+//}
 
 sourceSets {
-    api
-    main
-    test
-    main.resources.srcDirs += 'src/generated/resources'
+    data
+    main.resources {
+        srcDirs += data.resources.srcDirs
+        exclude '.cache/'
+    }
 }
 
+print "Java: ${System.getProperty('java.version')}"
+print ", JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')})"
+println ", Arch: ${System.getProperty('os.arch')}"
+
 minecraft {
-    mappings channel: project.mappings_channel, version: "${project.mappings_version}-${project.mappings_mc_version}"
-    if (project.hasProperty('at_file')) {
-        accessTransformer = file("src/main/resources/META-INF/${project.at_file}.cfg")
-    }
+    mappings channel: mappings_channel, version: mappings_version
 
     runs {
+        configureEach {
+            workingDirectory project.file('run/' + it.name) as File
+
+            property 'forge.logging.markers', logging_markers
+            property 'forge.logging.console.level', logging_console
+
+            ideaModule "$project.name}.main"
+            mods.register(modid as String) {
+                source sourceSets.main as SourceSet
+            }
+        }
+
         client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', "info"
-            mods.create("${project.mod_id}").source(sourceSets.main)
         }
 
         server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', "info"
-            mods.create("${project.mod_id}").source(sourceSets.main)
         }
 
-        //Used for Data Generators should you need to use them to create recipes, blockstate files and other resources.
         data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'info'
-            args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
-            mods.create("${project.mod_id}").source(sourceSets.main)
+            args '--mod', modid, '--all'
+            args '--output', sourceSets.data.resources.srcDirs[0].toString()
+            args '--existing', sourceSets.main.resources.srcDirs[0].toString()
+
+            ideaModule "${project.name}.data"
+            mods.named(modid as String) {
+                sources sourceSets.main as SourceSet, sourceSets.data as SourceSet
+            }
         }
     }
 }
 
-apply from: 'scripts/dependencies.gradle'
-apply from: 'scripts/jar_artifacts.gradle'
+dependencies {
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
-jar {
-    manifest {
-        mainAttributes(
-                "Maven-Artifact": "${project.group}:${archivesBaseName}:${project.mod_version}",
-                "Timestamp": System.currentTimeMillis(),
-                "Specification-Title": archivesBaseName,
-                "Specification-Vendor": "${project.mod_author}",
-                "Specification-Version": "1",
-                "Implementation-Title": archivesBaseName,
-                "Implementation-Version": "${project.mod_version}",
-                "Implementation-Vendor": "${project.mod_author}",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "Built-On-Java": "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
-                "Built-On": "${project.mc_version}-${project.forge_version}"
-        )
+    dataImplementation sourceSets.main.output
+}
 
-        if (project.hasProperty('core_plugin')) {
-            attributes 'FMLCorePluginContainsFMLMod': 'true'
-            attributes 'FMLCorePlugin': project.core_plugin
-        }
+java {
+    archivesBaseName = "${project.name}-${mc_version}"
+    toolchain.languageVersion = JavaLanguageVersion.of(16)
+    withSourcesJar()
+}
 
-        if (project.hasProperty('mod_at_file')) {
-            attributes 'FMLAT': project.mod_at_file
-        }
+var manifestAttributes = [
+        'Specification-Title'      : modid,
+        'Specification-Vendor'     : author,
+        'Specification-Version'    : versions.getRawVersion(),
+        'Implementation-Title'     : project.name,
+        'Implementation-Version'   : versions.getVersion(),
+        'Implementation-Vendor'    : author,
+        "Implementation-Timestamp" : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        "Git-Commit"            : versions.getCommitId(),
+        "Git-Commit-Timestamp"  : versions.getCommitTimestamp(),
+        'Built-On-Java'            : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+        'Built-On-Minecraft'       : mc_version,
+        'Built-On-Mappings-Version': "${mappings_channel}-${mc_version}"
+] as LinkedHashMap
 
-        if (project.hasProperty('mod_contained_deps')) {
-            attributes 'ContainedDeps': project.mod_contained_deps
-        }
+tasks.withType(Jar).configureEach {
+    manifest.attributes(manifestAttributes)
+    includeEmptyDirs false
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+
+    // Normalize line endings from CRLF to LF
+    filesMatching('META-INF/mods.toml') {
+        //noinspection UnnecessaryQualifiedReference
+        filter(org.apache.tools.ant.filters.FixCrLfFilter.class,
+                eol: org.apache.tools.ant.filters.FixCrLfFilter.CrLf.newInstance('lf'))
     }
 }
 
-tasks.publish.dependsOn build
-tasks.curseforge.dependsOn publish
+tasks.named('jar', Jar).configure {
+    finalizedBy 'reobfJar'
+}
+
+// noinspection UnnecessaryQualifiedReference
+tasks.withType(net.minecraftforge.gradle.userdev.tasks.RenameJarInPlace).configureEach {
+    args.add('--stable')
+}
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.mod_version
-            from components.java
+    publications.create('mavenJava', MavenPublication) {
+        from components.java
 
-            if (getBooleanProperty('create_source_jar')) {
-                artifact sourceJar {
-                    classifier 'sources'
-                }
-            }
-
-
-            if (getBooleanProperty('create_deobf_jar')) {
-                artifact deobfJar {
-                    classifier 'deobf'
-                }
-            }
-
-            if (getBooleanProperty('create_javadoc_jar')) {
-                artifact javadocJar {
-                    classifier 'javadoc'
-                }
-            }
-
-            if (getBooleanProperty('create_api_jar')) {
-                artifact apiJar {
-                    classifier 'api'
-                }
-            }
-
-            pom {
-                name = project.mod_id
-                url = project.website_url
-                packaging = 'jar'
-                scm {
-                    connection = "scm:git:git://github.com/" + project.repo + ".git"
-                    developerConnection = "scm:git:git@github.com:" + project.repo + ".git"
-                    url = "https://github.com/" + project.repo
-                }
-                issueManagement {
-                    system = 'github'
-                    url = "https://github.com/" + project.repo + "/issues"
-                }
-                organization {
-                    name = project.org_name
-                    url = project.website_url
-                }
-            }
-        }
+        it.artifactId = project.name
+        it.version = "$mc_version-${versions.getRawVersion()}${versions.isSnapshot() ? '-SNAPSHOT' : ''}"
     }
+
     repositories {
         maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+            name 'projectLocal'
+            url "file://${project.file('repo').absolutePath}"
         }
-    }
-}
-
-curseforge {
-    if (project.hasProperty('curseforge_project_id')) {
-        project {
-            id = project.project_id
-            if (project.hasProperty('changelog')) {
-                changelog = file(project.changelog)
-            } else {
-                changelog = ''
-            }
-
-            if (project.hasProperty('changelog_type')) {
-                changelogType = project.changelog_type
-            }
-
-            if ((project.hasProperty('release_type')) && ((project.release_type == 'alpha') || (project.release_type == 'beta') || (project.release_type == 'release'))) {
-                releaseType = project.release_type
-            } else {
-                releaseType = 'alpha'
-            }
-
-            if (project.hasProperty('curseforge_versions')) {
-                final def versions = "${project.curseforge_versions}".split(', ')
-                versions.each {
-                    addGameVersion "${it}"
-                }
-            }
-            mainArtifact(jar) {
-                if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                    displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version}"
-                }
-
-                if (project.hasProperty('curseforge_requirements') || project.hasProperty('curseforge_optionals') || project.hasProperty('curseforge_embeddeds') || project.hasProperty('curseforge_tools') || project.hasProperty('curseforge_incompatibles') || project.hasProperty('curseforge_includes')) {
-                    relations {
-                        if (project.hasProperty('curseforge_requirements')) {
-                            final def requirements = "${project.curseforge_requirements}".split(', ')
-                            requirements.each {
-                                requiredDependency "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_optionals')) {
-                            final def optionals = "${project.curseforge_optionals}".split(', ')
-                            optionals.each {
-                                optionalDependency "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_embeddeds')) {
-                            final def embeddeds = "${project.curseforge_embeddeds}".split(', ')
-                            embeddeds.each {
-                                embeddedLibrary "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_tools')) {
-                            final def tools = "${project.curseforge_tools}".split(', ')
-                            tools.each {
-                                tool "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_incompatibles')) {
-                            final def incompatibles = "${project.curseforge_incompatibles}".split(', ')
-                            incompatibles.each {
-                                incompatible "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_includes')) {
-                            final def includes = "${project.curseforge_includes}".split(', ')
-                            includes.each {
-                                include "${it}"
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_api_jar')) {
-                addArtifact(apiJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} API"
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_source_jar')) {
-                addArtifact(sourceJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Sources"
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_deobf_jar')) {
-                addArtifact(deobfJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Development"
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_javadoc_jar')) {
-                addArtifact(javadocJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Javadoc"
-                    }
-                }
-            }
-        }
-    }
-}
-
-tasks.getByName("curseforge").doLast {
-    try {
-        //Reads the file ID given to us by CurseForge
-        def newFileId = tasks.getByName("curseforge${project_id}").property('mainArtifact').fileID
-        def webhook = new Webhook(discordWebhook, "${project.findProperty('mod_name')} Gradle Upload")
-
-        def message = new Message()
-        message.setUsername(project.mod_name)
-        def embed = new Embed()
-        embed.addField("${project.mod_name} ${project.mod_version}", "For Minecraft ${project.mc_version} has been uploaded to CurseForge.", false)
-        embed.addField('Download:', "${project.curseforge_url}/files/$newFileId", false)
-        embed.addField('Changelog:', "${project.changelog}", false)
-        embed.setColor(0xFF8000)
-        message.addEmbed(embed)
-        webhook.sendMessage(message)
-    }
-
-    catch (IOException exception) {
-        println 'Failed to push to the Discord webhook. You may be missing properties needed for the tasks to finish.'
-    }
-}
-
-boolean getBooleanProperty(final String property) {
-    if (project.hasProperty(property)) {
-        return ((String) project.findProperty(property)).toBoolean()
-    } else {
-        return false
     }
 }
