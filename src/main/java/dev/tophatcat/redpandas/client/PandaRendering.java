@@ -20,19 +20,24 @@
  */
 package dev.tophatcat.redpandas.client;
 
-import dev.tophatcat.redpandas.RedPandas;
+import dev.tophatcat.redpandas.client.models.RedPandaModel;
 import dev.tophatcat.redpandas.client.rendering.RenderRedPanda;
-import dev.tophatcat.redpandas.common.EntityRegistry;
-import net.minecraftforge.api.distmarker.Dist;
+import dev.tophatcat.redpandas.common.PandaRegistry;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.eventbus.api.IEventBus;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD, modid = RedPandas.MOD_ID)
-public class RedPandaRenderingRegistry {
+public class PandaRendering {
 
-    @SubscribeEvent
+    public static void setupRendering(IEventBus modBus, IEventBus forgeBus) {
+        modBus.addListener(PandaRendering::registerEntityModels);
+        modBus.addListener(PandaRendering::registerLayerDefinitions);
+    }
+
     public static void registerEntityModels(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(EntityRegistry.RED_PANDA.get(), RenderRedPanda::new);
+        event.registerEntityRenderer(PandaRegistry.RED_PANDA.get(), RenderRedPanda::new);
+    }
+
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(RedPandaModel.RED_PANDA_LOCATION, RedPandaModel::createBodyLayer);
     }
 }

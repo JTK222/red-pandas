@@ -22,14 +22,31 @@ package dev.tophatcat.redpandas.common;
 
 import com.google.common.collect.Lists;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PandaConfig {
 
+    public static Set<String> allowList, disallowList;
+    public static int weight;
     public static final ServerConfig SERVER;
     public static final ForgeConfigSpec SERVER_SPECIFICATION;
+
+    public static void onLoad(ModConfigEvent.Loading event) {
+        allowList = new HashSet<>(PandaConfig.SERVER.biomeAllowList.get());
+        disallowList = new HashSet<>(PandaConfig.SERVER.biomeDisallowList.get());
+        weight = PandaConfig.SERVER.redPandaSpawnWeight.get() == -1 ? 45 : PandaConfig.SERVER.redPandaSpawnWeight.get();
+    }
+
+    public static void onReload(ModConfigEvent.Reloading event) {
+        allowList = new HashSet<>(PandaConfig.SERVER.biomeAllowList.get());
+        disallowList = new HashSet<>(PandaConfig.SERVER.biomeDisallowList.get());
+        weight = PandaConfig.SERVER.redPandaSpawnWeight.get() == -1 ? 45 : PandaConfig.SERVER.redPandaSpawnWeight.get();
+    }
 
     static {
         Pair<ServerConfig, ForgeConfigSpec> specificationPair =

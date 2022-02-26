@@ -20,7 +20,7 @@
  */
 package dev.tophatcat.redpandas.common.entities;
 
-import dev.tophatcat.redpandas.common.EntityRegistry;
+import dev.tophatcat.redpandas.common.PandaRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -104,7 +104,7 @@ public class RedPandaEntity extends Animal {
     @Nullable
     @Override
     public RedPandaEntity getBreedOffspring(@Nonnull ServerLevel world, @Nonnull AgeableMob ageableEntity) {
-        return EntityRegistry.RED_PANDA.get().create(world);
+        return PandaRegistry.RED_PANDA.get().create(world);
     }
 
     @Override

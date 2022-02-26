@@ -20,17 +20,23 @@
  */
 package dev.tophatcat.redpandas;
 
-import dev.tophatcat.redpandas.common.EntityRegistry;
+import dev.tophatcat.redpandas.client.PandaRendering;
 import dev.tophatcat.redpandas.common.PandaConfig;
+import dev.tophatcat.redpandas.common.PandaEvents;
+import dev.tophatcat.redpandas.common.PandaRegistry;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.awt.Color;
 
@@ -47,14 +53,32 @@ public class RedPandas {
      * Setup the mod.
      */
     public RedPandas() {
+        //TODO Fix missing model animations.
+        //TODO Fix missing spawn egg.
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
+        FMLJavaModLoadingContext fmlContext = FMLJavaModLoadingContext.get();
+
+        IEventBus modBus = fmlContext.getModEventBus();
+        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
+
+        PandaRegistry.ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            PandaRendering.setupRendering(modBus, forgeBus);
+        }
+
         modLoadingContext.registerConfig(ModConfig.Type.COMMON, PandaConfig.SERVER_SPECIFICATION);
+        modBus.addListener(PandaConfig::onLoad);
+        modBus.addListener(PandaConfig::onReload);
+        modBus.addListener(PandaRegistry::commonSetupEvent);
+        modBus.addListener(PandaRegistry::attributeCreation);
+        forgeBus.addListener(PandaEvents::serverAboutToStart);
+        forgeBus.addListener(PandaEvents::biomeLoad);
     }
 
-    @SubscribeEvent
+    @SuppressWarnings("deprecation")
     public static void registerItems(RegistryEvent.Register<Item> event) {
         event.getRegistry().registerAll(
-            new SpawnEggItem(EntityRegistry.RED_PANDA.get(), Color.RED.getRGB(), Color.BLACK.getRGB(),
+            new SpawnEggItem(PandaRegistry.RED_PANDA.get(), Color.RED.getRGB(), Color.BLACK.getRGB(),
                 new Item.Properties().tab(CreativeModeTab.TAB_MISC))
                 .setRegistryName(MOD_ID + ":red_panda_spawn_egg"));
     }
