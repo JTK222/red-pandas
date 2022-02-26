@@ -26,10 +26,9 @@ import dev.tophatcat.redpandas.common.PandaEvents;
 import dev.tophatcat.redpandas.common.PandaRegistry;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -37,8 +36,9 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-
-import java.awt.Color;
+import net.minecraftforge.fmllegacy.RegistryObject;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod(RedPandas.MOD_ID)
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
@@ -49,12 +49,12 @@ public class RedPandas {
      */
     public static final String MOD_ID = "redpandas";
 
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
+
     /**
      * Setup the mod.
      */
     public RedPandas() {
-        //TODO Fix missing model animations.
-        //TODO Fix missing spawn egg.
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         FMLJavaModLoadingContext fmlContext = FMLJavaModLoadingContext.get();
 
@@ -62,6 +62,7 @@ public class RedPandas {
         IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
         PandaRegistry.ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         if (FMLEnvironment.dist == Dist.CLIENT) {
             PandaRendering.setupRendering(modBus, forgeBus);
         }
@@ -75,11 +76,8 @@ public class RedPandas {
         forgeBus.addListener(PandaEvents::biomeLoad);
     }
 
-    @SuppressWarnings("deprecation")
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().registerAll(
-            new SpawnEggItem(PandaRegistry.RED_PANDA.get(), Color.RED.getRGB(), Color.BLACK.getRGB(),
-                new Item.Properties().tab(CreativeModeTab.TAB_MISC))
-                .setRegistryName(MOD_ID + ":red_panda_spawn_egg"));
-    }
+    @SuppressWarnings({"unused"})
+    public static final RegistryObject<Item> RED_PANDA_SPAWN_EGG = ITEMS.register("red_panda_spawn_egg",
+        () -> new ForgeSpawnEggItem(PandaRegistry.RED_PANDA, 0xff0000, 0x000000,
+            new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 }

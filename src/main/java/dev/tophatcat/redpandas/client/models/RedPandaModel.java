@@ -34,6 +34,9 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+
+import javax.annotation.Nonnull;
 
 public class RedPandaModel<T extends RedPandaEntity> extends EntityModel<T> {
 
@@ -98,8 +101,16 @@ public class RedPandaModel<T extends RedPandaEntity> extends EntityModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-
+    public void setupAnim(@Nonnull T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        this.head.xRot = headPitch * 0.0070F;
+        this.head.yRot = netHeadYaw * 0.0070F;
+        this.leftFrontLeg.xRot = Mth.cos(limbSwing * 0.6662F) * 0.9F * limbSwingAmount;
+        this.rightFrontLeg.xRot = Mth.cos(limbSwing * 0.6662F
+            + (float) Math.PI) * 1.4F * limbSwingAmount;
+        this.rightBackLeg.xRot = Mth.cos(limbSwing * 0.6662F) * 0.9F * limbSwingAmount;
+        this.leftBackLeg.xRot = Mth.cos(limbSwing * 0.6662F
+            + (float) Math.PI) * 1.4F * limbSwingAmount;
+        this.tail.yRot = Mth.cos(limbSwing * 0.6662F) * 0.3F * limbSwingAmount;
     }
 
     @Override
