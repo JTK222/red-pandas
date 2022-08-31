@@ -24,6 +24,7 @@ public class RedPandas {
         IEventBus mod = FMLJavaModLoadingContext.get().getModEventBus(),
         forge = MinecraftForge.EVENT_BUS;
         RedPandaRegistry.ENTITIES.register(mod);
+        RedPandaRegistry.ITEMS.register(mod);
         mod.addListener(RedPandaRegistry::registerAttributes);
         mod.addListener(RedPandaRegistry::registerEntityPlacement);
         forge.addListener(RedPandaSpawnHandler::addSpawns);
