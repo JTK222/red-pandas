@@ -1,10 +1,11 @@
-package cat.tophat.redpandas.common.entities;
+package dev.tophatcat.redpandas.init;
 
-import cat.tophat.redpandas.RedPandas;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
+import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.ai.goal.FollowParentGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
@@ -23,15 +24,15 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class RedPandaEntity extends AnimalEntity {
+public class RedPanda extends AnimalEntity {
 
-    private static final Ingredient TEMPTATION_ITEMS = Ingredient.fromItems(Items.BAMBOO);
+    private static final Ingredient TEMPTATION_ITEMS = Ingredient.of(Items.BAMBOO);
 
-    public RedPandaEntity(EntityType<? extends RedPandaEntity> type, World world) {
+    public RedPanda(EntityType<? extends RedPanda> type, World world) {
         super(type, world);
     }
 
@@ -47,41 +48,40 @@ public class RedPandaEntity extends AnimalEntity {
         goalSelector.addGoal(7, new LookRandomlyGoal(this));
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
+    public static AttributeModifierMap.MutableAttribute redPandaAttributes() {
+        return CreatureEntity.createLivingAttributes()
+            .add(Attributes.FOLLOW_RANGE, 16D)
+            .add(Attributes.MAX_HEALTH, 20.0D)
+            .add(Attributes.MOVEMENT_SPEED, 0.3F);
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_PANDA_AMBIENT;
+        return SoundEvents.PANDA_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(@Nonnull DamageSource source) {
-        return SoundEvents.ENTITY_PANDA_HURT;
+        return SoundEvents.PANDA_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_PANDA_DEATH;
+        return SoundEvents.PANDA_DEATH;
     }
 
     @Override
     protected void playStepSound(@Nonnull BlockPos pos, @Nonnull BlockState state) {
-        playSound(SoundEvents.ENTITY_PANDA_STEP, 0.10F, 2.0F);
-    }
-
-    @Nullable
-    @Override
-    public AgeableEntity createChild(@Nonnull AgeableEntity ageableEntity) {
-        return RedPandas.RED_PANDA_ENTITY.create(world);
+        playSound(SoundEvents.PANDA_STEP, 0.10F, 2.0F);
     }
 
     @Override
-    public boolean isBreedingItem(@Nonnull ItemStack stack) {
+    public RedPanda getBreedOffspring(@Nonnull ServerWorld world, @Nonnull AgeableEntity ageableEntity) {
+        return RedPandaRegistry.RED_PANDA.get().create(level);
+    }
+
+    @Override
+    public boolean isFood(@Nonnull ItemStack stack) {
         return TEMPTATION_ITEMS.test(stack);
     }
 }

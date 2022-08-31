@@ -1,317 +1,287 @@
-buildscript {
-    repositories {
-        maven {
-            name = 'MinecraftForge Maven'
-            url = 'https://files.minecraftforge.net/maven'
-        }
-        maven {
-            name = 'Gradle Maven'
-            url = 'https://plugins.gradle.org/m2/'
-        }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
-        classpath group: 'com.diluv.schoomp', name: 'Schoomp', version: "${project.schoomp_version}"
-    }
-}
-
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'com.matthewprenger.cursegradle'
-
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import com.diluv.schoomp.Webhook
 import com.diluv.schoomp.message.Message
 import com.diluv.schoomp.message.embed.Embed
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
-version = "${project.mc_version}-${project.mod_version}"
-group = "${project.group}"
-archivesBaseName = "${project.mod_id}"
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-
-sourceSets {
-    api
-    main
-    test
-}
-
-minecraft {
-    mappings channel: project.mappings_channel, version: "${project.mappings_version}-${project.mappings_mc_version}"
-    if (project.hasProperty('at_file')) {
-        accessTransformer = file("src/main/resources/META-INF/${project.at_file}.cfg")
+buildscript {
+    repositories {
+        mavenCentral()
     }
+    dependencies {
+        classpath("com.diluv.schoomp:Schoomp:1.2.6")
+    }
+}
 
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.cadixdev.licenser' version '0.6.1'
+    id 'net.darkhax.curseforgegradle' version '1.0.11'
+}
+
+version = "${mod_version}"
+group = "${mod_group}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "${mod_name}-Forge-${minecraft_version}"
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    // The mappings can be changed at any time and must be in the following format.
+    // Channel:   Version:
+    // official   MCVersion             Official field/method names from Mojang mapping files
+    // parchment  YYYY.MM.DD-MCVersion  Open community-sourced parameter names and javadocs layered on top of official
+    //
+    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
+    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Parchment is an unofficial project maintained by ParchmentMC, separate from MinecraftForge
+    // Additional setup is needed to use their mappings: https://github.com/ParchmentMC/Parchment/wiki/Getting-Started
+    //
+    // Use non-default mappings at your own risk. They may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'official', version: minecraft_version
+
+    if (project.forge_ats_enabled) {
+        accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+        project.logger.debug("Forge Access Transformers are enabled for the project ${mod_name}.")
+    }
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
     runs {
         client {
             workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', "info"
-            mods.create("${project.mod_id}").source(sourceSets.main)
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            //property 'forge.enabledGameTestNamespaces', mod_id
+
+            // These arguments allow for optional authentication with Mojang servers.
+            // If you want to authenticate, put these properties in GRADLE_HOME/gradle.properties.
+            // By default, this is C:\Users\<your username>\.gradle\gradle.properties on Windows or ~/.gradle/gradle.properties on Linux/MacOS.
+            if (project.hasProperty('mc_uuid')) {
+                // Your UUID, trimmed / without the dashes
+                args '--uuid', project.getProperty('mc_uuid')
+            }
+
+            if (project.hasProperty('mc_username')) {
+                // Your Minecraft in-game username, not email
+                args '--username', project.getProperty('mc_username')
+            }
+
+            mods.create("${mod_id}").source(sourceSets.main)
         }
 
         server {
             workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', "info"
-            mods.create("${project.mod_id}").source(sourceSets.main)
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            args '--singleplayer', "yes", '--nogui', "true"
+
+            //property 'forge.enabledGameTestNamespaces', mod_id
+
+            mods.create("${mod_id}").source(sourceSets.main)
         }
 
-        //Used for Data Generators should you need to use them to create recipes, blockstate files and other resources.
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            args '--singleplayer', "yes", '--nogui', "true"
+
+            //property 'forge.enabledGameTestNamespaces', mod_id
+
+            mods.create("${mod_id}").source(sourceSets.main)
+        }
+
         data {
             workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'info'
-            args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
-            mods.create("${project.mod_id}").source(sourceSets.main)
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods.create("${mod_id}").source(sourceSets.main)
         }
     }
 }
 
-apply from: 'scripts/dependencies.gradle'
-apply from: 'scripts/jar_artifacts.gradle'
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    // Put repositories for dependencies here
+    // ForgeGradle automatically adds the Forge maven and Maven Central for you
+
+    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
+    // flatDir {
+    //     dir 'libs'
+    // }
+}
+
+dependencies {
+    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Real mod deobf dependency examples - these get remapped to your current mappings
+    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
+    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
+    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
+
+    // Examples using mod jars from ./libs
+    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+}
+
+processResources {
+    def buildProps = project.properties.clone()
+
+    // Replaces FML's magic file.jarVersion string with the correct version at build time.
+    buildProps.put('file', [jarVersion: mod_version])
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand buildProps
+    }
+}
+
+var manifestAttributes = [
+        "Specification-Title"      : mod_name,
+        "Specification-Vendor"     : mod_author,
+        "Specification-Version"    : "1", // We are version 1 of ourselves
+        "Implementation-Title"     : mod_name,
+        "Implementation-Version"   : project.jar.archiveVersion,
+        "Implementation-Vendor"    : mod_author,
+        "Implementation-Timestamp" : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        "Built-On-Java"            : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+        "Build-On-Minecraft"       : minecraft_version
+]
 
 jar {
-    manifest {
-        mainAttributes(
-                "Maven-Artifact": "${project.group}:${archivesBaseName}:${project.mod_version}",
-                "Timestamp": System.currentTimeMillis(),
-                "Specification-Title": archivesBaseName,
-                "Specification-Vendor": "${project.mod_author}",
-                "Specification-Version": "1",
-                "Implementation-Title": archivesBaseName,
-                "Implementation-Version": "${project.mod_version}",
-                "Implementation-Vendor": "${project.mod_author}",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "Built-On-Java": "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
-                "Built-On": "${project.mc_version}-${project.forge_version}"
-        )
-
-        if (project.hasProperty('core_plugin')) {
-            attributes 'FMLCorePluginContainsFMLMod': 'true'
-            attributes 'FMLCorePlugin': project.core_plugin
+    from("LICENSE.txt") {
+        rename {
+            "LICENSE_${archiveBaseName.get()}"
         }
 
-        if (project.hasProperty('mod_at_file')) {
-            attributes 'FMLAT': project.mod_at_file
-        }
-
-        if (project.hasProperty('mod_contained_deps')) {
-            attributes 'ContainedDeps': project.mod_contained_deps
-        }
+        manifest.attributes(manifestAttributes)
+        includeEmptyDirs false
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
     }
 }
 
-tasks.publish.dependsOn build
-tasks.curseforge.dependsOn publish
+// Example configuration to allow publishing using the maven-publish plugin
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar')
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+// publish.dependsOn('reobfJar')
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.mod_version
-            from components.java
-
-            if (getBooleanProperty('create_source_jar')) {
-                artifact sourceJar {
-                    classifier 'sources'
-                }
-            }
-
-
-            if (getBooleanProperty('create_deobf_jar')) {
-                artifact deobfJar {
-                    classifier 'deobf'
-                }
-            }
-
-            if (getBooleanProperty('create_javadoc_jar')) {
-                artifact javadocJar {
-                    classifier 'javadoc'
-                }
-            }
-
-            if (getBooleanProperty('create_api_jar')) {
-                artifact apiJar {
-                    classifier 'api'
-                }
-            }
-
-            pom {
-                name = project.mod_id
-                url = project.website_url
-                packaging = 'jar'
-                scm {
-                    connection = "scm:git:git://github.com/" + project.repo + ".git"
-                    developerConnection = "scm:git:git@github.com:" + project.repo + ".git"
-                    url = "https://github.com/" + project.repo
-                }
-                issueManagement {
-                    system = 'github'
-                    url = "https://github.com/" + project.repo + "/issues"
-                }
-                organization {
-                    name = project.org_name
-                    url = project.website_url
-                }
-            }
+            artifact jar
         }
     }
     repositories {
         maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+            url "file://${project.projectDir}/mcmodsrepo"
         }
     }
 }
 
-curseforge {
-    if (project.hasProperty('curseforge_project_id')) {
-        project {
-            id = project.project_id
-            if (project.hasProperty('changelog')) {
-                changelog = file(project.changelog)
-            } else {
-                changelog = ''
-            }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
 
-            if (project.hasProperty('changelog_type')) {
-                changelogType = project.changelog_type
-            }
+final var actualDateTime = OffsetDateTime.now(ZoneOffset.UTC).withNano(0)
 
-            if ((project.hasProperty('release_type')) && ((project.release_type == 'alpha') || (project.release_type == 'beta') || (project.release_type == 'release'))) {
-                releaseType = project.release_type
-            } else {
-                releaseType = 'alpha'
-            }
-
-            if (project.hasProperty('curseforge_versions')) {
-                final def versions = "${project.curseforge_versions}".split(', ')
-                versions.each {
-                    addGameVersion "${it}"
-                }
-            }
-            mainArtifact(jar) {
-                if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                    displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version}"
-                }
-
-                if (project.hasProperty('curseforge_requirements') || project.hasProperty('curseforge_optionals') || project.hasProperty('curseforge_embeddeds') || project.hasProperty('curseforge_tools') || project.hasProperty('curseforge_incompatibles') || project.hasProperty('curseforge_includes')) {
-                    relations {
-                        if (project.hasProperty('curseforge_requirements')) {
-                            final def requirements = "${project.curseforge_requirements}".split(', ')
-                            requirements.each {
-                                requiredDependency "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_optionals')) {
-                            final def optionals = "${project.curseforge_optionals}".split(', ')
-                            optionals.each {
-                                optionalDependency "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_embeddeds')) {
-                            final def embeddeds = "${project.curseforge_embeddeds}".split(', ')
-                            embeddeds.each {
-                                embeddedLibrary "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_tools')) {
-                            final def tools = "${project.curseforge_tools}".split(', ')
-                            tools.each {
-                                tool "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_incompatibles')) {
-                            final def incompatibles = "${project.curseforge_incompatibles}".split(', ')
-                            incompatibles.each {
-                                incompatible "${it}"
-                            }
-                        }
-
-                        if (project.hasProperty('curseforge_includes')) {
-                            final def includes = "${project.curseforge_includes}".split(', ')
-                            includes.each {
-                                include "${it}"
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_api_jar')) {
-                addArtifact(apiJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} API"
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_source_jar')) {
-                addArtifact(sourceJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Sources"
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_deobf_jar')) {
-                addArtifact(deobfJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Development"
-                    }
-                }
-            }
-
-            if (getBooleanProperty('create_javadoc_jar')) {
-                addArtifact(javadocJar) {
-                    if (getBooleanProperty('curseforge_use_custom_display_name')) {
-                        displayName = "${project.mod_name} ${project.mc_version} ${project.mod_version} Javadoc"
-                    }
-                }
-            }
-        }
+license {
+    ignoreFailures = false
+    header = project.file('LicenseHeader.txt')
+    include '**/*.java'
+    include '**/*.kt'
+    exclude '**/package-info.java'
+    exclude '**/module-info.java'
+    newLine = false
+    properties {
+        year = actualDateTime.getYear()
+        name = mod_name
+        source = mod_source
+        author = mod_author
     }
 }
 
-tasks.getByName("curseforge").doLast {
+task publishToCurseForge(type: TaskPublishCurseForge) {
+    apiToken = project.findProperty("curseforge_api_token") ?: "invalid/no CurseForge API token found!"
+
+    def mainFile = upload(curseforge_project_id, file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
+
+    mainFile.displayName = "${archivesBaseName}-${version}"
+    mainFile.releaseType = curseforge_release_type
+    mainFile.addModLoader(curseforge_mod_loader)
+    mainFile.addGameVersion(minecraft_version)
+    mainFile.addJavaVersion(curseforge_java_version)
+
+    //mainFile.addRequirement('fabric-api') //Fabric API slug
+    //mainFile.addEmbedded('cloth-config') //Cloth Config slug
+    mainFile.changelog = mod_changelog_url
+}
+
+tasks.publishToCurseForge.dependsOn(tasks.assemble)
+
+if (project.findProperty("discord_webhook")) {
+    tasks.publish.dependsOn(tasks.publishToCurseForge)
+}
+
+tasks.getByName("publishToCurseForge").doLast {
     try {
-        //Reads the file ID given to us by CurseForge
-        def newFileId = tasks.getByName("curseforge${project_id}").property('mainArtifact').fileID
-        def webhook = new Webhook(discordWebhook, "${project.findProperty('mod_name')} Gradle Upload")
+        def webhook = new Webhook(discord_webhook, "${mod_name} Gradle Upload");
 
-        def message = new Message()
-        message.setUsername(project.mod_name)
-        def embed = new Embed()
-        embed.addField("${project.mod_name} ${project.mod_version}", "For Minecraft ${project.mc_version} has been uploaded to CurseForge.", false)
-        embed.addField('Download:', "${project.curseforge_url}/files/$newFileId", false)
-        embed.addField('Changelog:', "${project.changelog}", false)
-        embed.setColor(0xFF8000)
-        message.addEmbed(embed)
-        webhook.sendMessage(message)
+        def message = new Message();
+        message.setUsername("Mod Update: ${mod_name}");
+        message.setContent("${mod_name} ${mod_version} for Minecraft version ${minecraft_version} has been uploaded pending review!");
+
+        def embed = new Embed();
+        embed.addField('Download:', "${mod_homepage}/files/", false);
+        embed.addField('Change Log:', mod_changelog_url, false);
+        embed.setColor(0xFF8000);
+        message.addEmbed(embed);
+
+        webhook.sendMessage(message);
     }
 
     catch (IOException exception) {
-        println 'Failed to push to the Discord webhook. You may be missing properties needed for the tasks to finish.'
-    }
-}
-
-boolean getBooleanProperty(final String property) {
-    if (project.hasProperty(property)) {
-        return ((String) project.findProperty(property)).toBoolean()
-    } else {
-        return false
+        println 'Failed to push to the Discord webhook.'
     }
 }
