@@ -28,7 +28,8 @@ public class RedPandas {
         mod.addListener(RedPandaRegistry::registerEntityPlacement);
         forge.addListener(RedPandaSpawnHandler::addSpawns);
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            mod.addListener(RedPandaRendering::registerModels);
+            mod.addListener(RedPandaRendering::registerEntityRendering);
+            mod.addListener(RedPandaRendering::registerLayers);
         }
     }
 }

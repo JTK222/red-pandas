@@ -1,55 +1,55 @@
 package dev.tophatcat.redpandas.init;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.BreedGoal;
-import net.minecraft.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import net.minecraft.entity.ai.goal.PanicGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
-import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.FollowParentGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ambient.AmbientCreature;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 
-public class RedPanda extends AnimalEntity {
+public class RedPanda extends Animal {
 
     private static final Ingredient TEMPTATION_ITEMS = Ingredient.of(Items.BAMBOO);
 
-    public RedPanda(EntityType<? extends RedPanda> type, World world) {
-        super(type, world);
+    public RedPanda(EntityType<? extends RedPanda> type, Level level) {
+        super(type, level);
     }
 
     @Override
     protected void registerGoals() {
-        goalSelector.addGoal(0, new SwimGoal(this));
+        goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new PanicGoal(this, 1.25D));
         goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-        goalSelector.addGoal(3, new TemptGoal(this, 1.2D, false, TEMPTATION_ITEMS));
+        goalSelector.addGoal(3, new TemptGoal(this, 1.2D, TEMPTATION_ITEMS, false));
         goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
-        goalSelector.addGoal(5, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-        goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 6.0F));
-        goalSelector.addGoal(7, new LookRandomlyGoal(this));
+        goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+        goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        goalSelector.addGoal(7, new RandomLookAroundGoal(this));
     }
 
-    public static AttributeModifierMap.MutableAttribute redPandaAttributes() {
-        return CreatureEntity.createLivingAttributes()
+    public static AttributeSupplier.Builder redPandaAttributes() {
+        return AmbientCreature.createLivingAttributes()
             .add(Attributes.FOLLOW_RANGE, 16D)
             .add(Attributes.MAX_HEALTH, 20.0D)
             .add(Attributes.MOVEMENT_SPEED, 0.3F);
@@ -76,7 +76,7 @@ public class RedPanda extends AnimalEntity {
     }
 
     @Override
-    public RedPanda getBreedOffspring(@Nonnull ServerWorld world, @Nonnull AgeableEntity ageableEntity) {
+    public RedPanda getBreedOffspring(@Nonnull ServerLevel level, @Nonnull AgeableMob ageableEntity) {
         return RedPandaRegistry.RED_PANDA.get().create(level);
     }
 
