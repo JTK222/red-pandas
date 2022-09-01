@@ -20,7 +20,7 @@ import net.minecraftforge.registries.RegistryObject;
 public class RedPandaRegistry {
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(
-        ForgeRegistries.ENTITIES, RedPandas.MOD_ID);
+        ForgeRegistries.ENTITY_TYPES, RedPandas.MOD_ID);
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(
         ForgeRegistries.ITEMS, RedPandas.MOD_ID);
