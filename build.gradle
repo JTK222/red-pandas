@@ -178,11 +178,11 @@ processResources {
 
 var manifestAttributes = [
         "Specification-Title"      : mod_name,
-        "Specification-Vendor"     : mod_author,
+        "Specification-Vendor"     : 'KiriCattus',
         "Specification-Version"    : "1", // We are version 1 of ourselves
         "Implementation-Title"     : mod_name,
         "Implementation-Version"   : project.jar.archiveVersion,
-        "Implementation-Vendor"    : mod_author,
+        "Implementation-Vendor"    : 'KiriCattus',
         "Implementation-Timestamp" : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
         "Built-On-Java"            : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
         "Build-On-Minecraft"       : minecraft_version
@@ -238,7 +238,7 @@ license {
         year = actualDateTime.getYear()
         name = mod_name
         source = mod_source
-        author = mod_author
+        author = 'KiriCattus'
     }
 }
 
