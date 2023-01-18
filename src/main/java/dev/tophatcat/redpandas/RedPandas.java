@@ -16,14 +16,16 @@ public class RedPandas {
 
     public RedPandas() {
         IEventBus mod = FMLJavaModLoadingContext.get().getModEventBus();
+
         RedPandaRegistry.ENTITIES.register(mod);
         RedPandaRegistry.ITEMS.register(mod);
         mod.addListener(RedPandaRegistry::registerAttributes);
         mod.addListener(RedPandaRegistry::registerEntityPlacement);
+
         if (FMLEnvironment.dist == Dist.CLIENT) {
             mod.addListener(RedPandaRendering::registerEntityRendering);
             mod.addListener(RedPandaRendering::registerLayers);
+            mod.addListener(RedPandaRegistry::addToCreativeTabs);
         }
-        System.out.println(ForgeRegistries.BIOMES.getEntries());
     }
 }
